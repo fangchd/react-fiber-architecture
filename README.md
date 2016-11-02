@@ -41,17 +41,48 @@ The key points are:
 
 ### Reconciliation versus rendering
 
+In React, reconciliation and rendering are separate phases. 
+
 Fiber reimplements the reconciler. It is not principally concerned with rendering.
 
-### Scheduling
+The key points are:
 
-<dl>
-  <dt>scheduling</dt>
-  <dd>the process of determining when work should be performed.</dd>
-  
-  <dt>work</dt>
-  <dd>any computations that must be performed. Work is usually the result of an update (e.g. <code>setState</code>).
-</dl>
+- In a UI, it's not necessary for every update to be applied immediately; in fact, doing so can be wasteful, causing frames to drop and degrading the user experience.
+- Different types of updates have different priorities — an animation update needs to complete more quickly than, say, an update from a data store.
+- A push-based approach requires the app (you, the programmer) to decide how to schedule work. A pull-based approach allows the framework (React) to be smart and make those decisions for you.
+
+## What is a fiber?
+
+Primary goal of Fiber
+
+- pause work and come back to it later.
+- assign priority to different types of work.
+- reuse previously completed work.
+- abort work if it's no longer needed.
+
+A fiber represents a **unit of work**.
+
+The way computers typically track a program's execution is using the [call stack](https://en.wikipedia.org/wiki/Call_stack). When a function is executed, a new **stack frame** is added to the stack. That stack frame represents the work that is performed by that function.
+
+Newer browsers (and React Native) implement APIs that help address this exact problem: `requestIdleCallback` schedules a low priority function to be called during an idle period, and `requestAnimationFrame` schedules a high priority function to be called on the next animation frame. 
+
+Fiber is reimplementation of the stack, specialized for React components. You can think of a single fiber as a **virtual stack frame**.
+
+The advantage of reimplementing the stack is that you can [keep stack frames in memory](https://www.facebook.com/groups/2003630259862046/permalink/2054053404819731/) and execute them however (and *whenever*) you want. This is crucial for accomplishing the goals we have for scheduling.
+
+Aside from scheduling, manually dealing with stack frames unlocks the potential for features such as concurrency and error boundaries. 
+
+### Structure of a fiber
+
+In concrete terms, a fiber is a JavaScript object that contains information about a component, its input, and its output.
+
+A fiber corresponds to a stack frame, but it also corresponds to an instance of a component.
+
+#### `type` and `key`
+
+The type of a fiber describes the component that it corresponds to. For composite components, the type is the function or class component itself. For host components (`div`, `span`, etc.), the type is a string.
+
+
 
 
 
